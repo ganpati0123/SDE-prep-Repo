@@ -1,9 +1,30 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Calendar, Code as Code2, Eye, CircleAlert as AlertCircle, ChartBar as BarChart3, LayoutDashboard, Target, BookOpen, Flame } from 'lucide-react'
+import { Calendar, Code as Code2, Eye, CircleAlert as AlertCircle, ChartBar as BarChart3, LayoutDashboard, Target, BookOpen, Flame, Clock } from 'lucide-react'
 import { getTodayDayNumber } from '../data/schedule'
 import NotificationManager from './NotificationManager'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+
+function useISTClock() {
+  const [time, setTime] = useState('')
+  useEffect(() => {
+    const update = () => {
+      const now = new Date()
+      const istOffset = 5.5 * 60 * 60 * 1000
+      const ist = new Date(now.getTime() + istOffset + (now.getTimezoneOffset() * 60 * 1000))
+      const h = ist.getUTCHours()
+      const m = ist.getUTCMinutes().toString().padStart(2, '0')
+      const s = ist.getUTCSeconds().toString().padStart(2, '0')
+      const period = h >= 12 ? 'PM' : 'AM'
+      const h12 = h % 12 === 0 ? 12 : h % 12
+      setTime(`${h12}:${m}:${s} ${period} IST`)
+    }
+    update()
+    const interval = setInterval(update, 1000)
+    return () => clearInterval(interval)
+  }, [])
+  return time
+}
 
 export default function Layout() {
   const navigate = useNavigate()
@@ -37,6 +58,7 @@ export default function Layout() {
   }
 
   const progressPercent = Math.round((solvedCount / 275) * 100)
+  const istTime = useISTClock()
 
   return (
     <div className="app-layout">
@@ -82,6 +104,10 @@ export default function Layout() {
           </div>
         </nav>
         <div className="sidebar-footer">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px', justifyContent: 'center' }}>
+            <Clock size={12} color="var(--cyan-bright)" />
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--cyan-bright)', fontFamily: 'var(--font-mono)' }}>{istTime}</span>
+          </div>
           <div className="sidebar-progress-ring">
             <div className="progress-ring-circle" style={{ ['--p' as any]: `${progressPercent}%` }}>
               <div className="progress-ring-inner">{progressPercent}%</div>

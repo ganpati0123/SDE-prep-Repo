@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { getDaySchedule, formatDuration, getTopicTypeBadge } from '../data/schedule'
 import type { ProblemAttempt } from '../types'
 import NotificationToast from '../components/NotificationToast'
+import { runCodeWithValidation, type TestResult } from '../lib/codeRunner'
 
 export default function CodeEditor() {
   const { dayNumber, questionId } = useParams()
@@ -19,7 +20,7 @@ export default function CodeEditor() {
   const [attempt, setAttempt] = useState<ProblemAttempt | null>(null)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
-  const [testResults, setTestResults] = useState<{ passed: boolean; input: string; expected: string; output: string }[]>([])
+  const [testResults, setTestResults] = useState<TestResult[]>([])
   const [accuracy, setAccuracy] = useState(0)
   const [savedStatus, setSavedStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -93,18 +94,17 @@ export default function CodeEditor() {
     if (!question) return
     const testCases = question.testCases
     if (!testCases || testCases.length === 0) {
-      setTestResults([{ passed: true, input: 'No test cases', expected: 'N/A', output: 'Code executed' }])
-      setAccuracy(100); return
+      setTestResults([])
+      setAccuracy(0); return
     }
     setIsRunning(true)
     setTimeout(() => {
-      const results = testCases.map(tc => ({ passed: true, input: tc.input, expected: tc.expected, output: tc.expected }))
-      setTestResults(results)
-      const acc = Math.round((results.filter(r => r.passed).length / results.length) * 100)
-      setAccuracy(acc)
+      const result = runCodeWithValidation(code, language, testCases)
+      setTestResults(result.results)
+      setAccuracy(result.accuracy)
       setIsRunning(false)
-      saveProgress('attempted', acc)
-    }, 800)
+      saveProgress('attempted', result.accuracy)
+    }, 500)
   }
 
   // Camera tracking functions
@@ -291,12 +291,22 @@ export default function CodeEditor() {
               {question.testCases && question.testCases.length > 0 && (
                 <>
                   <div className="section-title" style={{ marginTop: '20px', marginBottom: '12px', fontSize: '14px' }}>Test Cases</div>
+                  {testResults.length > 0 && (
+                    <div className={`test-result-summary ${testResults.every(r => r.passed) ? 'all-passed' : 'some-failed'}`}>
+                      {testResults.filter(r => r.passed).length} / {testResults.length} passed — {accuracy}% accuracy
+                    </div>
+                  )}
                   {testResults.length > 0 ? (
                     testResults.map((r, i) => (
                       <div key={i} className={`test-case ${r.passed ? 'test-case-passed' : 'test-case-failed'}`}>
-                        <div className="test-case-label">Test {i + 1} — {r.passed ? 'Passed' : 'Failed'}</div>
+                        <div className="test-case-label">
+                          {r.passed ? '✓' : '✗'} Test {i + 1} — {r.passed ? 'Passed' : 'Failed'}
+                        </div>
                         <div className="test-case-content">
-                          <div>Input: {r.input}</div><div>Expected: {r.expected}</div><div>Output: {r.output}</div>
+                          <div>Input: {r.input}</div>
+                          <div>Expected: {r.expected}</div>
+                          <div>Output: {r.output}</div>
+                          {r.error && <div style={{ color: 'var(--red-bright)', marginTop: '4px' }}>Error: {r.error}</div>}
                         </div>
                       </div>
                     ))

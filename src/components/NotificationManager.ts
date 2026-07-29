@@ -5,12 +5,26 @@ interface NotificationData {
   id: string
   title: string
   body: string
-  icon: string
   type: 'schedule' | 'reminder' | 'weak-topic'
 }
 
 let activeNotifications: string[] = []
 let checkInterval: ReturnType<typeof setInterval> | null = null
+
+// Get current time in Kolkata/IST timezone (UTC+5:30)
+function getISTTime(): { hours: number; minutes: number; day: number; month: number; year: number } {
+  const now = new Date()
+  // IST is UTC+5:30
+  const istOffset = 5.5 * 60 * 60 * 1000
+  const istTime = new Date(now.getTime() + istOffset + (now.getTimezoneOffset() * 60 * 1000))
+  return {
+    hours: istTime.getUTCHours(),
+    minutes: istTime.getUTCMinutes(),
+    day: istTime.getUTCDate(),
+    month: istTime.getUTCMonth() + 1,
+    year: istTime.getUTCFullYear(),
+  }
+}
 
 export default class NotificationManager {
   static init() {
@@ -21,19 +35,20 @@ export default class NotificationManager {
     checkInterval = setInterval(() => {
       this.checkSchedule()
       this.checkWeakTopics()
-    }, 60000) // check every minute
+    }, 30000) // check every 30 seconds for more precise timing
   }
 
   static async checkSchedule() {
     const todayDay = getTodayDayNumber()
     const schedule = getDaySchedule(todayDay)
-    const now = new Date()
-    const currentMinutes = now.getHours() * 60 + now.getMinutes()
+    const ist = getISTTime()
+    const currentMinutes = ist.hours * 60 + ist.minutes
 
     for (const block of schedule.blocks) {
       const blockStartMinutes = block.startHour * 60 + block.startMinute
       const diff = blockStartMinutes - currentMinutes
 
+      // Fire notification when block starts (within 1 minute window)
       if (diff === 0 || (diff <= 1 && diff >= 0)) {
         const notifId = `schedule-${todayDay}-${block.id}`
         if (!activeNotifications.includes(notifId)) {
@@ -42,7 +57,20 @@ export default class NotificationManager {
             id: notifId,
             title: `Block Starting: ${block.name}`,
             body: block.topic ? `Topic: ${block.topic}` : 'Time to start this block',
-            icon: 'calendar',
+            type: 'schedule',
+          })
+        }
+      }
+
+      // Also fire a 5-minute warning for study blocks
+      if (block.type === 'study' && diff === 5) {
+        const notifId = `schedule-warning-${todayDay}-${block.id}`
+        if (!activeNotifications.includes(notifId)) {
+          activeNotifications.push(notifId)
+          this.show({
+            id: notifId,
+            title: `Upcoming: ${block.name}`,
+            body: `Starts in 5 minutes. ${block.topic ? 'Topic: ' + block.topic : ''}`,
             type: 'schedule',
           })
         }
@@ -67,13 +95,13 @@ export default class NotificationManager {
       const now = new Date()
       const hoursSinceLast = lastReminded ? (now.getTime() - lastReminded.getTime()) / (1000 * 60 * 60) : 999
 
+      // Remind every 4 hours
       if (hoursSinceLast >= 4) {
         activeNotifications.push(notifId)
         this.show({
           id: notifId,
           title: 'Weak Topic Reminder',
           body: `Don't forget to review: ${topic.topic_name}`,
-          icon: 'alert',
           type: 'weak-topic',
         })
         await supabase.from('weak_topics').update({ last_reminded: now.toISOString() }).eq('id', topic.id)
@@ -86,7 +114,9 @@ export default class NotificationManager {
     window.dispatchEvent(event)
 
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(notif.title, { body: notif.body })
+      try {
+        new Notification(notif.title, { body: notif.body })
+      } catch { /* ignore */ }
     }
   }
 
@@ -98,6 +128,10 @@ export default class NotificationManager {
 
   static dismiss(id: string) {
     activeNotifications = activeNotifications.filter(n => n !== id)
+  }
+
+  static getISTTime() {
+    return getISTTime()
   }
 }
 
