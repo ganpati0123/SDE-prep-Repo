@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Editor from '@monaco-editor/react'
-import { Play, CheckCircle, Clock, ArrowLeft, Code2, Trophy, Save } from 'lucide-react'
+import { Play, CircleCheck as CheckCircle, Clock, ArrowLeft, Code as Code2, Trophy, Save } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getDaySchedule, formatDuration } from '../data/schedule'
 import type { ProblemAttempt } from '../types'

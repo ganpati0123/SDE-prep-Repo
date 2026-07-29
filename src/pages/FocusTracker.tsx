@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Play, Square, Camera, AlertTriangle, CheckCircle, Clock } from 'lucide-react'
+import { Eye, EyeOff, Play, Square, Camera, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, Clock } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getTodayDayNumber, formatDuration } from '../data/schedule'
 import NotificationToast from '../components/NotificationToast'

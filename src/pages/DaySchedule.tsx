@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Clock, Code2, BookOpen, RotateCcw, CheckCircle, ArrowLeft, Calendar } from 'lucide-react'
+import { Clock, Code as Code2, BookOpen, RotateCcw, CircleCheck as CheckCircle, ArrowLeft, Calendar } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getDaySchedule, formatTime, formatDuration } from '../data/schedule'
 import type { ProblemAttempt, StudySession } from '../types'

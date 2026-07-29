@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Bell, X, AlertCircle, Calendar } from 'lucide-react'
+import { Bell, X, CircleAlert as AlertCircle, Calendar } from 'lucide-react'
 import NotificationManager from './NotificationManager'
 
 interface ToastNotification {

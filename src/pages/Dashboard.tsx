@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Clock, CheckCircle, Target, TrendingUp, Calendar, Code2, Eye, AlertCircle, ArrowRight, Flame } from 'lucide-react'
+import { Clock, CircleCheck as CheckCircle, Target, TrendingUp, Calendar, Code as Code2, Eye, CircleAlert as AlertCircle, ArrowRight, Flame } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getTodayDayNumber, getDaySchedule, formatDuration, PHASES } from '../data/schedule'
 import type { ProblemAttempt, FocusLog, WeakTopic } from '../types'

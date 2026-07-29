@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { TrendingUp, Clock, CheckCircle, Target, Award, BarChart3 } from 'lucide-react'
+import { TrendingUp, Clock, CircleCheck as CheckCircle, Target, Award, ChartBar as BarChart3 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { formatDuration, getTodayDayNumber, PHASES, getAllDays } from '../data/schedule'
 import type { ProblemAttempt, FocusLog, StudySession } from '../types'

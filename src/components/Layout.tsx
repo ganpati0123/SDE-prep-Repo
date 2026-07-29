@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Calendar, Code2, Eye, AlertCircle, BarChart3, LayoutDashboard, Target, BookOpen } from 'lucide-react'
+import { Calendar, Code as Code2, Eye, CircleAlert as AlertCircle, ChartBar as BarChart3, LayoutDashboard, Target, BookOpen } from 'lucide-react'
 import { getTodayDayNumber } from '../data/schedule'
 import NotificationManager from './NotificationManager'
 import { useEffect } from 'react'

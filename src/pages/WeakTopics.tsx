@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, AlertCircle, CheckCircle, Bell, BellOff, Trash2, X } from 'lucide-react'
+import { Plus, CircleAlert as AlertCircle, CircleCheck as CheckCircle, Bell, BellOff, Trash2, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { WeakTopic } from '../types'
 import NotificationToast from '../components/NotificationToast'
